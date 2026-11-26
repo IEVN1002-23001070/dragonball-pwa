@@ -1,0 +1,110 @@
+{
+  "configVersion": 1,
+  "timestamp": 1795668405148,
+  "index": "/dragonball-pwa/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/dragonball-pwa/favicon.ico",
+        "/dragonball-pwa/icons/icon-128x128.png",
+        "/dragonball-pwa/icons/icon-144x144.png",
+        "/dragonball-pwa/icons/icon-152x152.png",
+        "/dragonball-pwa/icons/icon-192x192.png",
+        "/dragonball-pwa/icons/icon-384x384.png",
+        "/dragonball-pwa/icons/icon-512x512.png",
+        "/dragonball-pwa/icons/icon-72x72.png",
+        "/dragonball-pwa/icons/icon-96x96.png",
+        "/dragonball-pwa/index.html",
+        "/dragonball-pwa/main-YFJYXLJA.js",
+        "/dragonball-pwa/manifest.webmanifest",
+        "/dragonball-pwa/styles-O7T27BEW.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "dragonball-api",
+      "patterns": [
+        "https:\\/\\/dragonball-api\\.com\\/api\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 300,
+      "maxAge": 604800000,
+      "timeoutMs": 5000,
+      "cacheOpaqueResponses": false,
+      "cacheQueryOptions": {
+        "ignoreVary": true,
+        "ignoreSearch": false
+      },
+      "version": 1
+    },
+    {
+      "name": "dragonball-images",
+      "patterns": [
+        "https:\\/\\/dragonball-api\\.com\\/characters\\/.*",
+        "https:\\/\\/dragonball-api\\.com\\/planetas\\/.*",
+        "https:\\/\\/dragonball-api\\.com\\/transformaciones\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 300,
+      "maxAge": 2592000000,
+      "timeoutMs": 3000,
+      "cacheOpaqueResponses": true,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    }
+  ],
+  "hashTable": {
+    "/dragonball-pwa/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "/dragonball-pwa/icons/icon-128x128.png": "87427ca42dc0e76ef3b143fb7a21cf3b681ed987",
+    "/dragonball-pwa/icons/icon-144x144.png": "ea8317ad8ab17cd3271e0669abf192a1e2a8dbd6",
+    "/dragonball-pwa/icons/icon-152x152.png": "17b5c49ef0f560df1359e6dc92bafa2312fd24d3",
+    "/dragonball-pwa/icons/icon-192x192.png": "a0b9a9a59fea855aa00c07368d6137e54568180e",
+    "/dragonball-pwa/icons/icon-384x384.png": "e4ff465a5566ee1cd5870786bd960c7853d8ff18",
+    "/dragonball-pwa/icons/icon-512x512.png": "2bbd775278b51c09eedd04c06fda53aa8da1af2f",
+    "/dragonball-pwa/icons/icon-72x72.png": "0f8d8101d567008253221d6b55dc6397413ae63b",
+    "/dragonball-pwa/icons/icon-96x96.png": "e70855da52839615dd5e7fdb304b034387d3162b",
+    "/dragonball-pwa/index.html": "fa236490a843c782029626a1bddf56872ef0c2e9",
+    "/dragonball-pwa/main-YFJYXLJA.js": "0928566bb98cf90e14e549ce397faf38c4aa05ad",
+    "/dragonball-pwa/manifest.webmanifest": "a2c6cecf03665c5f63d3be4a4c54dbf401b6a472",
+    "/dragonball-pwa/styles-O7T27BEW.css": "a9be66c223d5b8e0c5c6706eb550d39877e7f67b"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
