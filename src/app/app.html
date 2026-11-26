@@ -1,0 +1,348 @@
+<a href="#contenido" class="skip-link" (click)="$event.preventDefault(); inicio.focus()">Saltar al contenido</a>
+<header class="site-header sticky top-0 z-50 border-b border-slate-800 bg-slate-950">
+  <nav class="site-nav mx-auto max-w-7xl px-4 py-3 sm:px-5 sm:py-4" aria-label="Navegación principal">
+    <a href="#personajes" (click)="navigate($event, 'characters')" class="brand-link flex items-center gap-3 text-left" aria-label="Dragon Ball Universe, inicio">
+      <span class="dragon-ball" aria-hidden="true">★</span>
+      <span>
+        <span class="block text-xl font-black tracking-wide text-orange-500">DRAGON BALL</span>
+        <span class="block text-xs tracking-widest text-slate-400">UNIVERSE</span>
+      </span>
+    </a>
+    <div class="nav-links">
+      <a href="#personajes" (click)="navigate($event, 'characters')" [attr.aria-current]="section() === 'characters' ? 'page' : null" class="nav-link">Personajes</a>
+      <a href="#planetas" (click)="navigate($event, 'planets')" [attr.aria-current]="section() === 'planets' ? 'page' : null" class="nav-link">Planetas</a>
+      <a href="#transformaciones" (click)="navigate($event, 'transformations')" [attr.aria-current]="section() === 'transformations' ? 'page' : null" class="nav-link">Transformaciones</a>
+    </div>
+  </nav>
+</header>
+
+<main #inicio id="contenido" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-8">
+  <section [hidden]="section() !== 'characters'" class="hero-banner character-hero mb-10 overflow-hidden rounded-3xl border border-orange-500/30 p-6 sm:p-6 sm:p-8 md:p-12">
+    <div class="hero-content">
+      <span class="inline-block rounded-full bg-orange-500/20 px-4 py-2 text-xs font-bold tracking-widest text-orange-400">UNIVERSO DRAGON BALL</span>
+      <h1 class="mt-5 text-3xl font-black text-white sm:text-4xl lg:text-6xl">
+        Explora un universo <span class="block text-orange-500">sin límites.</span>
+      </h1>
+      <p class="mt-5 max-w-xl leading-relaxed text-slate-300">Descubre a los guerreros, villanos y personajes legendarios que forman parte del universo de Dragon Ball.</p>
+      <button type="button" (click)="catalogo.scrollIntoView({block: 'start'})" class="mt-6 inline-block rounded-xl bg-orange-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-orange-400">Explorar personajes</button>
+    </div>
+    @if (characters()[0]; as featured) {
+      <div class="hero-art" aria-hidden="true">
+        <span class="hero-aura"></span>
+        <img [src]="featured.image" alt="" fetchpriority="high">
+      </div>
+    }
+  </section>
+
+  <section #catalogo [hidden]="section() !== 'characters'" id="personajes" class="catalog-anchor" [attr.aria-busy]="loading()">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="text-sm font-bold tracking-widest text-orange-500">ENCICLOPEDIA</p>
+        <h2 class="mt-2 text-3xl font-black text-white">Personajes</h2>
+      </div>
+      @if (!loading() && !error()) {
+        <span class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-300">{{ totalCharacters() }} personajes</span>
+      }
+    </div>
+
+    @if (loading()) {
+      <div role="status" class="flex min-h-72 flex-col items-center justify-center">
+        <div aria-hidden="true" class="h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500"></div>
+        <p class="mt-5 text-slate-400">Cargando personajes...</p>
+      </div>
+    } @else if (error()) {
+      <div role="alert" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center">
+        <p class="text-red-300">{{ error() }}</p>
+        <button type="button" (click)="loadCharacters()" class="mt-5 rounded-xl bg-orange-500 px-6 py-3 font-bold text-slate-950 hover:bg-orange-400">Intentar nuevamente</button>
+      </div>
+    } @else {
+      <div role="search" aria-label="Buscar y filtrar personajes" class="mb-7 rounded-2xl border border-slate-700 bg-slate-900 p-5 md:p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h3 class="text-lg font-bold text-white">Encuentra a tu personaje</h3>
+          <button type="button" (click)="clearFilters()" [disabled]="!hasFilters()" class="rounded-lg px-3 py-2 text-sm font-semibold text-orange-400 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40">Limpiar filtros</button>
+        </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label for="search-character" class="mb-2 block text-sm font-medium text-slate-300">Buscar por nombre</label>
+            <div class="relative">
+              <svg aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+              <input #searchInput id="search-character" type="search" autocomplete="off" placeholder="Ej. Goku" [value]="search()" (input)="setSearch(searchInput.value)" class="w-full rounded-lg border border-slate-600 bg-slate-950 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+            </div>
+          </div>
+          <div>
+            <label for="race-filter" class="mb-2 block text-sm font-medium text-slate-300">Raza</label>
+            <select #raceInput id="race-filter" [value]="race()" (change)="setRace(raceInput.value)" class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+              <option value="">Todas las razas</option>
+              @for (option of races(); track option) { <option [value]="option">{{ option }}</option> }
+            </select>
+          </div>
+          <div>
+            <label for="gender-filter" class="mb-2 block text-sm font-medium text-slate-300">Género</label>
+            <select #genderInput id="gender-filter" [value]="gender()" (change)="setGender(genderInput.value)" class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+              <option value="">Todos los géneros</option>
+              @for (option of genders(); track option) { <option [value]="option">{{ option }}</option> }
+            </select>
+          </div>
+          <div>
+            <label for="affiliation-filter" class="mb-2 block text-sm font-medium text-slate-300">Afiliación</label>
+            <select #affiliationInput id="affiliation-filter" [value]="affiliation()" (change)="setAffiliation(affiliationInput.value)" class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+              <option value="">Todas las afiliaciones</option>
+              @for (option of affiliations(); track option) { <option [value]="option">{{ option }}</option> }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-400" aria-live="polite">
+        <span><strong class="text-orange-400">{{ resultCount() }}</strong> de {{ totalCharacters() }} personajes</span>
+        @if (resultCount() > 0) { <span>Mostrando {{ firstResult() }}–{{ lastResult() }}</span> }
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @for (character of visibleCharacters(); track character.id) {
+          <article class="character-card overflow-hidden rounded-2xl border border-slate-700 bg-slate-900">
+            <div class="character-image relative flex h-72 items-center justify-center p-5">
+              <span class="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-semibold text-orange-400">#{{ character.id }}</span>
+              <img [src]="character.image" [alt]="character.name" loading="lazy" class="h-full w-full object-contain">
+            </div>
+            <div class="p-5">
+              <h3 class="text-2xl font-black text-white">{{ character.name }}</h3>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <span class="rounded-md bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400">{{ character.race }}</span>
+                <span class="rounded-md bg-blue-500/15 px-3 py-1 text-xs text-blue-300">{{ character.gender }}</span>
+              </div>
+              <dl class="mt-5 space-y-3 border-t border-slate-700 pt-4">
+                <div class="flex flex-wrap justify-between gap-1"><dt class="text-sm text-slate-400">Ki base</dt><dd class="break-all text-sm font-bold text-yellow-400">{{ character.ki }}</dd></div>
+                <div class="flex flex-wrap justify-between gap-1"><dt class="text-sm text-slate-400">Ki máximo</dt><dd class="break-all text-sm font-bold text-orange-400">{{ character.maxKi }}</dd></div>
+                <div class="flex flex-wrap justify-between gap-1"><dt class="text-sm text-slate-400">Afiliación</dt><dd class="text-right text-sm text-white">{{ character.affiliation }}</dd></div>
+              </dl>
+              <button type="button" (click)="openCharacter(character, characterDialog)" [attr.aria-label]="'Ver personaje: ' + character.name" class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400">
+                Ver personaje <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </article>
+        } @empty {
+          <div class="col-span-full rounded-2xl border border-slate-700 bg-slate-900 px-6 py-14 text-center">
+            <h3 class="text-xl font-bold text-white">No se encontraron personajes</h3>
+            <p class="mt-2 text-sm text-slate-400">Intenta con otro nombre o cambia los filtros seleccionados.</p>
+            @if (hasFilters()) {
+              <button type="button" (click)="clearFilters()" class="mt-5 rounded-lg bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400">Ver todos los personajes</button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (resultCount() > 0) {
+        <nav aria-label="Paginación de personajes" class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <button type="button" (click)="previousPage(); catalogo.scrollIntoView({block: 'start'})" [disabled]="currentPage() === 1" class="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40">Anterior</button>
+          <span class="text-sm text-slate-400">Página {{ currentPage() }} de {{ totalPages() }}</span>
+          <button type="button" (click)="nextPage(); catalogo.scrollIntoView({block: 'start'})" [disabled]="currentPage() === totalPages()" class="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-slate-950 hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-40">Siguiente</button>
+        </nav>
+      }
+    }
+  </section>
+
+  <section #planetCatalog id="planetas" [hidden]="section() !== 'planets'" class="catalog-anchor" [attr.aria-busy]="planetsLoading()">
+    <div class="hero-banner mb-8 rounded-3xl border border-orange-500/30 p-6 sm:p-8 md:p-12">
+      <p class="text-xs font-bold tracking-widest text-orange-400">EXPLORA LA GALAXIA</p>
+      <h1 class="mt-4 text-3xl font-black sm:text-4xl md:text-5xl">Mundos de <span class="text-orange-500">Dragon Ball</span></h1>
+      <p class="mt-4 max-w-2xl leading-relaxed text-slate-300">Descubre los planetas del universo, su historia, su estado y los personajes que provienen de ellos.</p>
+    </div>
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div><p class="text-sm font-bold tracking-widest text-orange-500">ENCICLOPEDIA</p><h2 class="mt-2 text-3xl font-black">Planetas</h2></div>
+      @if (!planetsLoading() && !planetsError()) { <span class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-300">{{ planets().length }} planetas</span> }
+    </div>
+    @if (planetsLoading()) {
+      <div role="status" class="flex min-h-72 flex-col items-center justify-center gap-4"><div class="h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500" aria-hidden="true"></div><p class="text-slate-300">Cargando planetas...</p></div>
+    } @else if (planetsError()) {
+      <div role="alert" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center"><p class="text-red-300">{{ planetsError() }}</p><button type="button" (click)="loadPlanets()" class="mt-5 rounded-xl bg-orange-500 px-6 py-3 font-bold text-slate-950 hover:bg-orange-400">Intentar nuevamente</button></div>
+    } @else {
+      <div class="mb-6 rounded-2xl border border-slate-700 bg-slate-900 p-5 md:p-7">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 class="text-lg font-bold">Encuentra un planeta</h3><button type="button" (click)="clearPlanetFilters()" [disabled]="!planetSearch() && !planetStatus()" class="text-sm font-bold text-orange-400 hover:text-orange-300 disabled:opacity-40">Limpiar filtros</button></div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm text-slate-300">Buscar por nombre<input #planetInput type="search" [value]="planetSearch()" (input)="planetSearch.set(planetInput.value)" placeholder="Ej. Namek" class="mt-2 block w-full rounded-lg border border-slate-600 bg-slate-950 p-3 text-white placeholder:text-slate-500 focus:border-orange-400 focus:outline-none"></label>
+          <label class="block text-sm text-slate-300">Estado<select #planetSelect [value]="planetStatus()" (change)="planetStatus.set(planetSelect.value)" class="mt-2 block w-full rounded-lg border border-slate-600 bg-slate-950 p-3 text-white focus:border-orange-400 focus:outline-none"><option value="">Todos los estados</option><option value="intact">No destruido</option><option value="destroyed">Destruido</option></select></label>
+        </div>
+      </div>
+      <p aria-live="polite" class="mb-5 text-sm text-slate-400"><strong class="text-orange-400">{{ filteredPlanets().length }}</strong> de {{ planets().length }} planetas</p>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        @for (planet of filteredPlanets(); track planet.id) {
+          <article class="character-card flex flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900">
+            <div class="relative bg-slate-800"><img [src]="planet.image" [alt]="planet.name" loading="lazy" class="h-52 w-full object-cover"><span class="absolute left-4 top-4 rounded-full bg-slate-950/90 px-3 py-1 text-xs font-bold text-orange-400">#{{ planet.id }}</span></div>
+            <div class="flex flex-1 flex-col p-5"><h3 class="text-2xl font-black">{{ planet.name }}</h3><span class="mt-3 self-start rounded-full bg-slate-800 px-3 py-1 text-xs font-bold" [class.text-red-300]="planet.isDestroyed === true" [class.text-emerald-300]="planet.isDestroyed === false">{{ planet.isDestroyed === true ? 'Destruido' : planet.isDestroyed === false ? 'No destruido' : 'Estado no disponible' }}</span><p class="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-300">{{ planet.description || 'Sin descripción disponible.' }}</p><div class="mt-auto pt-5"><button type="button" (click)="openPlanet(planet, planetDialog)" [attr.aria-label]="'Ver planeta: ' + planet.name" class="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-orange-400">Ver planeta <span aria-hidden="true">→</span></button></div></div>
+          </article>
+        } @empty {
+          <div class="col-span-full rounded-2xl border border-slate-700 bg-slate-900 p-8 text-center"><h3 class="text-xl font-bold">No se encontraron planetas</h3><p class="mt-2 text-slate-400">Intenta con otro nombre o cambia el estado.</p><button type="button" (click)="clearPlanetFilters()" class="mt-5 rounded-lg bg-orange-500 px-5 py-3 font-bold text-slate-950">Ver todos los planetas</button></div>
+        }
+      </div>
+    }
+  </section>
+  <section #transformationCatalog id="transformaciones" [hidden]="section() !== 'transformations'" class="catalog-anchor" [attr.aria-busy]="transformationsLoading()">
+    <div class="hero-banner mb-10 overflow-hidden rounded-3xl border border-orange-500/30 p-6 sm:p-8 md:p-10">
+      <p class="text-sm font-bold tracking-widest text-orange-400">EL PODER DE LOS GUERREROS</p>
+      <h1 class="mt-4 text-3xl font-black text-white sm:text-4xl md:text-5xl">Más allá de <span class="text-orange-500">los límites</span></h1>
+      <p class="mt-4 max-w-2xl leading-relaxed text-slate-300">Descubre las distintas formas y niveles de poder de los guerreros del universo Dragon Ball.</p>
+    </div>
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div><p class="text-sm font-bold tracking-widest text-orange-500">ENCICLOPEDIA</p><h2 class="mt-2 text-3xl font-black">Transformaciones</h2></div>
+      @if (!transformationsLoading() && !transformationsError()) {<span class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-300">{{ transformations().length }} transformaciones</span>}
+    </div>
+    @if (transformationsLoading()) {
+      <div role="status" class="flex min-h-72 flex-col items-center justify-center gap-4"><div class="h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500" aria-hidden="true"></div><p class="text-slate-300">Cargando transformaciones...</p></div>
+    } @else if (transformationsError()) {
+      <div role="alert" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center"><p class="text-red-300">{{ transformationsError() }}</p><button type="button" (click)="loadTransformations()" class="mt-5 rounded-xl bg-orange-500 px-6 py-3 font-bold text-slate-950 hover:bg-orange-400">Intentar nuevamente</button></div>
+    } @else {
+      <div class="mb-6 rounded-2xl border border-slate-700 bg-slate-900 p-5 sm:p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 class="text-lg font-bold">Encuentra una transformación</h3><button type="button" (click)="setTransformationSearch('')" [disabled]="!transformationSearch()" class="text-sm font-bold text-orange-400 hover:text-orange-300 disabled:opacity-40">Limpiar búsqueda</button></div>
+        <label class="block text-sm text-slate-300">Buscar por nombre<input #formInput type="search" [value]="transformationSearch()" (input)="setTransformationSearch(formInput.value)" placeholder="Ej. Goku, SSJ, Piccolo" class="mt-2 block w-full rounded-lg border border-slate-600 bg-slate-950 p-3 text-white placeholder:text-slate-500 focus:border-orange-400 focus:outline-none"></label>
+      </div>
+      <p aria-live="polite" class="mb-5 text-sm text-slate-400"><strong class="text-orange-400">{{ filteredTransformations().length }}</strong> de {{ transformations().length }} transformaciones</p>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @for (form of visibleTransformations(); track form.id) {
+          <article class="character-card flex flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900">
+            <div class="character-image relative flex h-72 items-center justify-center p-5"><span class="absolute left-4 top-4 rounded-full bg-slate-950/90 px-3 py-1 text-xs font-bold text-orange-400">#{{ form.id }}</span><img [src]="form.image" [alt]="form.name" loading="lazy" class="h-full w-full object-contain"></div>
+            <div class="flex flex-1 flex-col p-5"><h3 class="break-words text-xl font-black">{{ form.name }}</h3><p class="mt-4 text-sm text-slate-400">Nivel de Ki</p><p class="mt-1 break-words font-bold text-yellow-400">{{ form.ki || 'No disponible' }}</p><div class="mt-auto pt-5"><button type="button" (click)="openTransformation(form, transformationDialog)" [attr.aria-label]="'Ver transformación: ' + form.name" class="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-orange-400">Ver transformación <span aria-hidden="true">→</span></button></div></div>
+          </article>
+        } @empty {
+          <div class="col-span-full rounded-2xl border border-slate-700 bg-slate-900 p-8 text-center"><h3 class="text-xl font-bold">No se encontraron transformaciones</h3><p class="mt-2 text-slate-400">Intenta con otro nombre.</p><button type="button" (click)="setTransformationSearch('')" class="mt-5 rounded-lg bg-orange-500 px-5 py-3 font-bold text-slate-950">Ver todas</button></div>
+        }
+      </div>
+      @if (transformationPages() > 1) {
+        <nav aria-label="Paginación de transformaciones" class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <button type="button" (click)="changeTransformationPage(-1); transformationCatalog.scrollIntoView({block: 'start'})" [disabled]="transformationPage() === 1" class="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold hover:bg-slate-800 disabled:opacity-40">Anterior</button>
+          <span class="text-sm text-slate-400">Página {{ transformationPage() }} de {{ transformationPages() }}</span>
+          <button type="button" (click)="changeTransformationPage(1); transformationCatalog.scrollIntoView({block: 'start'})" [disabled]="transformationPage() === transformationPages()" class="rounded-xl bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400 disabled:opacity-40">Siguiente</button>
+        </nav>
+      }
+    }
+  </section>
+</main>
+
+<dialog #characterDialog (close)="clearDetail(characterDialog)" aria-labelledby="character-detail-title" class="fixed inset-0 m-auto max-h-[90dvh] detail-dialog max-w-5xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 p-0 text-white shadow-2xl backdrop:bg-black/75">
+  <div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-700 bg-slate-950 px-5 py-4">
+    <div>
+      <p class="text-xs font-bold tracking-widest text-orange-400">FICHA DE PERSONAJE</p>
+      <h2 id="character-detail-title" class="mt-1 text-xl font-black">{{ selectedCharacter()?.name }}</h2>
+    </div>
+    <button type="button" autofocus (click)="closeCharacter(characterDialog)" class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">Cerrar <span aria-hidden="true">×</span></button>
+  </div>
+  <div class="p-5 md:p-8">
+    @if (detailLoading()) {
+      <div role="status" class="flex min-h-56 flex-col items-center justify-center gap-4">
+        <div aria-hidden="true" class="h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500"></div>
+        <p class="text-slate-300">Cargando información del personaje...</p>
+      </div>
+    } @else if (detailError()) {
+      <div role="alert" class="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
+        <p class="text-red-300">{{ detailError() }}</p>
+        @if (selectedCharacter(); as selected) {
+          <button type="button" (click)="loadDetail(selected.id)" class="mt-4 rounded-lg bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400">Intentar nuevamente</button>
+        }
+      </div>
+    } @else if (detail(); as character) {
+      <div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+        <div class="character-image relative flex min-h-72 items-center justify-center rounded-2xl border border-slate-700 p-5">
+          <span class="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-bold text-orange-400">#{{ character.id }}</span>
+          <img [src]="character.image" [alt]="character.name" class="h-80 w-full object-contain md:h-96">
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-3xl font-black text-white">{{ character.name }}</h3>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="rounded-md bg-orange-500/15 px-3 py-1 text-sm font-semibold text-orange-400">{{ character.race }}</span>
+            <span class="rounded-md bg-blue-500/15 px-3 py-1 text-sm text-blue-300">{{ character.gender }}</span>
+          </div>
+          <dl class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div class="min-w-0 rounded-xl border border-slate-700 bg-slate-900 p-4"><dt class="text-xs text-slate-400">Ki base</dt><dd class="mt-1 break-words font-bold text-yellow-400">{{ character.ki || 'No disponible' }}</dd></div>
+            <div class="min-w-0 rounded-xl border border-slate-700 bg-slate-900 p-4"><dt class="text-xs text-slate-400">Ki máximo</dt><dd class="mt-1 break-words font-bold text-orange-400">{{ character.maxKi || 'No disponible' }}</dd></div>
+            <div class="rounded-xl border border-slate-700 bg-slate-900 p-4 sm:col-span-2"><dt class="text-xs text-slate-400">Afiliación</dt><dd class="mt-1 font-semibold">{{ character.affiliation || 'No disponible' }}</dd></div>
+          </dl>
+          <h4 class="mt-6 text-lg font-bold">Historia y descripción</h4>
+          <p class="mt-2 whitespace-pre-line break-words leading-relaxed text-slate-300">{{ character.description || 'La API no proporciona una descripción.' }}</p>
+        </div>
+      </div>
+      <section class="mt-8 border-t border-slate-800 pt-6">
+        <h3 class="text-2xl font-black">Planeta de origen</h3>
+        @if (character.originPlanet; as planet) {
+          <article class="mt-4 grid overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+            <img [src]="planet.image" [alt]="planet.name" loading="lazy" class="h-52 w-full object-cover sm:h-full sm:max-h-80">
+            <div class="min-w-0 p-5">
+              <h4 class="text-xl font-bold">{{ planet.name }}</h4>
+              <span class="mt-2 inline-block rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold" [class.text-red-300]="planet.isDestroyed === true" [class.text-emerald-300]="planet.isDestroyed === false">{{ planet.isDestroyed === true ? 'Destruido' : planet.isDestroyed === false ? 'No destruido' : 'Estado no disponible' }}</span>
+              <p class="mt-3 break-words text-sm leading-relaxed text-slate-300">{{ planet.description || 'Sin descripción disponible.' }}</p>
+            </div>
+          </article>
+        } @else {
+          <p class="mt-3 text-slate-400">No hay información del planeta de origen disponible.</p>
+        }
+      </section>
+      <section class="mt-8 border-t border-slate-800 pt-6">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-2xl font-black">Transformaciones</h3>
+          <span class="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">{{ character.transformations?.length ?? 0 }} registradas</span>
+        </div>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          @for (form of (character.transformations ?? []); track form.id) {
+            <article class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900">
+              <div class="character-image flex h-56 items-center justify-center p-4"><img [src]="form.image" [alt]="form.name" loading="lazy" class="h-full w-full object-contain"></div>
+              <div class="p-4"><h4 class="break-words font-bold">{{ form.name }}</h4><p class="mt-2 break-words text-sm text-orange-400">Ki: {{ form.ki || 'No disponible' }}</p></div>
+            </article>
+          } @empty {
+            <p class="col-span-full rounded-xl border border-slate-700 bg-slate-900 p-5 text-sm text-slate-400">No hay transformaciones registradas para este personaje en la API.</p>
+          }
+        </div>
+      </section>
+      <div class="mt-8 flex justify-end"><button type="button" (click)="closeCharacter(characterDialog)" class="rounded-xl bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400">Volver al catálogo</button></div>
+    }
+  </div>
+</dialog>
+
+
+<dialog #planetDialog (close)="clearPlanetDetail(planetDialog)" aria-labelledby="planet-detail-title" class="fixed inset-0 m-auto max-h-[90dvh] detail-dialog max-w-5xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 p-0 text-white shadow-2xl backdrop:bg-black/75">
+  <div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-700 bg-slate-950 px-5 py-4"><div><p class="text-xs font-bold tracking-widest text-orange-400">FICHA DE PLANETA</p><h2 id="planet-detail-title" class="mt-1 text-xl font-black">{{ selectedPlanet()?.name }}</h2></div><button type="button" autofocus (click)="planetDialog.close()" class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold hover:bg-slate-800">Cerrar <span aria-hidden="true">×</span></button></div>
+  <div class="p-5 md:p-8">
+    @if (planetDetailLoading()) {
+      <div role="status" class="flex min-h-56 flex-col items-center justify-center gap-4"><div class="h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500" aria-hidden="true"></div><p class="text-slate-300">Cargando información del planeta...</p></div>
+    } @else if (planetDetailError()) {
+      <div role="alert" class="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center"><p class="text-red-300">{{ planetDetailError() }}</p>@if (selectedPlanet(); as selected) {<button type="button" (click)="loadPlanetDetail(selected.id)" class="mt-4 rounded-lg bg-orange-500 px-5 py-3 font-bold text-slate-950">Intentar nuevamente</button>}</div>
+    } @else if (planetDetail(); as planet) {
+      <img [src]="planet.image" [alt]="planet.name" class="max-h-96 w-full rounded-2xl bg-slate-900 object-contain">
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-3"><h3 class="text-3xl font-black">{{ planet.name }}</h3><span class="rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold" [class.text-red-300]="planet.isDestroyed === true" [class.text-emerald-300]="planet.isDestroyed === false">{{ planet.isDestroyed === true ? 'Destruido' : planet.isDestroyed === false ? 'No destruido' : 'Estado no disponible' }}</span></div>
+      <h4 class="mt-5 text-lg font-bold">Historia y descripción</h4><p class="mt-2 whitespace-pre-line leading-relaxed text-slate-300">{{ planet.description || 'Sin descripción disponible.' }}</p>
+      <section class="mt-8 border-t border-slate-800 pt-6"><h3 class="text-2xl font-black">Personajes originarios</h3><p class="mt-2 text-sm text-slate-400">{{ planet.characters?.length ?? 0 }} personajes registrados por la API</p><div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @for (native of (planet.characters ?? []); track native.id) {
+          <article class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900"><div class="character-image flex h-52 items-center justify-center p-4"><img [src]="native.image" [alt]="native.name" loading="lazy" class="h-full w-full object-contain"></div><div class="p-4"><h4 class="font-bold">{{ native.name }}</h4><p class="mt-1 text-sm text-orange-400">{{ native.race }}</p><button type="button" (click)="planetDialog.close(); openCharacter(native, characterDialog)" class="mt-3 w-full rounded-lg border border-orange-500/50 px-4 py-2 text-sm font-bold text-orange-400 hover:bg-slate-800">Ver personaje</button></div></article>
+        } @empty {<p class="col-span-full rounded-xl border border-slate-700 bg-slate-900 p-5 text-sm text-slate-400">No hay personajes originarios registrados para este planeta.</p>}
+      </div></section>
+      <div class="mt-8 flex justify-end"><button type="button" (click)="planetDialog.close()" class="rounded-xl bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400">Volver a planetas</button></div>
+    }
+  </div>
+</dialog>
+
+<dialog #transformationDialog (close)="clearTransformationDetail(transformationDialog)" aria-labelledby="transformation-detail-title" class="fixed inset-0 m-auto max-h-[90dvh] detail-dialog max-w-3xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 p-0 text-white shadow-2xl backdrop:bg-black/75">
+  <div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-700 bg-slate-950 px-5 py-4"><div><p class="text-xs font-bold tracking-widest text-orange-400">FICHA DE TRANSFORMACIÓN</p><h2 id="transformation-detail-title" class="mt-1 text-xl font-black">{{ selectedTransformation()?.name }}</h2></div><button type="button" autofocus (click)="transformationDialog.close()" class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold hover:bg-slate-800">Cerrar <span aria-hidden="true">×</span></button></div>
+  <div class="p-5 md:p-8">
+    @if (transformationDetail() ?? selectedTransformation(); as form) {
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="character-image flex min-h-72 items-center justify-center rounded-2xl border border-slate-700 p-5"><img [src]="form.image" [alt]="form.name" class="max-h-96 w-full object-contain"></div>
+        <div><p class="text-sm font-bold text-orange-400">#{{ form.id }}</p><h3 class="mt-2 break-words text-3xl font-black">{{ form.name }}</h3><div class="mt-5 rounded-xl border border-slate-700 bg-slate-900 p-4"><p class="text-sm text-slate-400">Nivel de Ki</p><p class="mt-2 break-words text-xl font-bold text-yellow-400">{{ form.ki || 'No disponible' }}</p></div>
+          @if (transformationDetailLoading()) {<p role="status" class="mt-5 text-sm text-slate-400">Consultando información adicional...</p>}
+          @else if (transformationDetailError()) {<div role="alert" class="mt-5 rounded-xl border border-slate-700 p-4 text-sm text-slate-300"><p>{{ transformationDetailError() }}</p><button type="button" (click)="loadTransformationDetail(form.id)" class="mt-3 font-bold text-orange-400 hover:underline">Intentar nuevamente</button></div>}
+          @else if (transformationDetail()?.character; as owner) {<div class="mt-5 rounded-xl border border-slate-700 bg-slate-900 p-4"><p class="text-sm text-slate-400">Personaje</p><p class="mt-2 font-bold">{{ owner.name }}</p><button type="button" (click)="transformationDialog.close(); openCharacter(owner, characterDialog)" class="mt-3 rounded-lg border border-orange-500/50 px-4 py-2 text-sm font-bold text-orange-400 hover:bg-slate-800">Ver personaje</button></div>}
+        </div>
+      </div>
+    }
+    <div class="mt-8 flex justify-end"><button type="button" (click)="transformationDialog.close()" class="rounded-xl bg-orange-500 px-5 py-3 font-bold text-slate-950 hover:bg-orange-400">Volver al catálogo</button></div>
+  </div>
+</dialog>
+
+<footer class="mt-10 border-t border-slate-800 bg-slate-950 px-5 py-8 text-center">
+  <h2 class="font-black text-orange-500">DRAGON BALL UNIVERSE</h2>
+  <p class="mt-2 text-sm text-slate-400">Explora el universo de tus personajes favoritos.</p>
+  <nav class="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm" aria-label="Navegación del pie de página">
+    <a href="#personajes" (click)="navigate($event, 'characters')" class="text-slate-300 hover:text-orange-400">Personajes</a>
+    <a href="#planetas" (click)="navigate($event, 'planets')" class="text-slate-300 hover:text-orange-400">Planetas</a>
+    <a href="#transformaciones" (click)="navigate($event, 'transformations')" class="text-slate-300 hover:text-orange-400">Transformaciones</a>
+  </nav>
+  <p class="mt-3 text-xs text-slate-400">Proyecto no oficial · Información proporcionada por Dragon Ball API.</p>
+  <a href="https://web.dragonball-api.com/" target="_blank" rel="noopener noreferrer" class="mt-2 inline-block text-sm text-orange-400 hover:underline">Dragon Ball API</a>
+</footer>
